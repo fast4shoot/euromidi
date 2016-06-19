@@ -16,3 +16,4 @@
 -D ENC_B=PD3
 -O2
 -Wall
+-Wextra
