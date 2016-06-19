@@ -40,7 +40,7 @@ ISR(PCINT2_vect) {
 	switch (encoder_state) {
 		case encoder_state_n:
 			if (a_change && !a && b) encoder_state = encoder_state_a;
-			else if (b_change && !b && a) encoder_state = encoder_state_a;
+			else if (b_change && !b && a) encoder_state = encoder_state_b;
 			break;
 
 		case encoder_state_a:

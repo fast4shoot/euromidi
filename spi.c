@@ -16,7 +16,7 @@ static volatile spi_state_t spi_state;
 
 void spi_setup() {
 	DDRB |= (1 << PB2) | (1 << PB3) | (1 << PB5);
-	SPCR = (1 << SPIE) | (1 << SPE) | (1 << MSTR) | (1 << SPR1);
+	SPCR = (1 << SPIE) | (1 << SPE) | (1 << MSTR);
 	spi_state = spi_state_ready;
 }
 
