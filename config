@@ -14,6 +14,7 @@
 -D ENC_PIN=PIND
 -D ENC_A=PD2
 -D ENC_B=PD3
+-D EVENT_QUEUE_SIZE=64
 -O2
 -Wall
 -Wextra
