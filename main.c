@@ -65,7 +65,7 @@ void led_cmd(uint8_t addr, uint8_t val) {
 	spi_tx(1 << DISP_SS, data, 2);
 }
 
-void setup() {
+void init_hw() {
 	spi_setup();
 	i2c_setup();
 	encoder_setup();
@@ -98,7 +98,7 @@ void line(uint8_t val) {
 }
 
 int main(void) {
-	setup();
+	init_hw();
 
 	{
 		led_cmd(0xc, 0x1); // zapnout
