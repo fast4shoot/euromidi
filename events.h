@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 // Enum of all possible events.
-// Some events may have exactly two bytes of additional data.
+// Some events may have up to two bytes of additional data
 typedef enum {
 	// midi channel mode events
 	// these have additional data
