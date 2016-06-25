@@ -17,7 +17,12 @@
 -D ENC_B=PD3
 -D EVENT_QUEUE_SIZE=64
 -D MIDI_BAUD=31250
--O2
+-O3
 -Wall
 -Wextra
+-pedantic
 -std=c99
+-funsigned-char
+-flto
+-fwhole-program
+-Wl,--relax
