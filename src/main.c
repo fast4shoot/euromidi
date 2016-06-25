@@ -104,6 +104,8 @@ int main(void) {
 		i2c_tx(DAC_ADDR, &cmd, 1);
 	}
 
+	DDRD |= (1 << PD4);
+
 	_delay_ms(10);
 
 	uint8_t counter = 0;
@@ -114,7 +116,17 @@ int main(void) {
 			switch (ev.id) {
 				case event_encoder_up: counter++; break;
 				case event_encoder_down: counter--; break;
-				case event_clock: break;
+				default: break;
+				
+			}
+			
+			PIND |= (1 << PD4);
+			uint8_t top = (counter & 0xf0) >> 4;
+			uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);
+			uint8_t data[8] = {top, bottom, top, bottom, top, bottom, top, bottom};
+			i2c_tx(DAC_ADDR, data, 8);
+
+			switch (ev.id) {
 				case event_note_on:
 					if (ev.b != 0) display_note(ev.a);
 					else display_show('O', 'F', 'F');
@@ -123,12 +135,6 @@ int main(void) {
 					break;
 				default: break;
 			}
-			
-			uint8_t top = (counter & 0xf0) >> 4;
-			uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);
-			uint8_t data[8] = {top, bottom, top, bottom, top, bottom, top, bottom};
-			i2c_tx(DAC_ADDR, data, 8);
-			// line(counter);
 		}
 	}
 

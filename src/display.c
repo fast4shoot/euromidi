@@ -7,7 +7,6 @@ static spi_channel_t spi_channel;
 
 void cmd(uint8_t addr, uint8_t val) {
 	uint8_t data[] = {addr, val};
-	while(!spi_ready());
 	spi_tx(spi_channel, data, 2);
 }
 
@@ -25,6 +24,8 @@ void display_show(uint8_t a, uint8_t b, uint8_t c) {
 		val |= (font[c] >> digit) & 1;
 		val |= ((font[b] >> digit) & 1) << 1;
 		val |= ((font[a] >> digit) & 1) << 2;
+		PIND |= (1 << PD4);
 		cmd(digit + 1, val);
+		PIND |= (1 << PD4);
 	}
 }
