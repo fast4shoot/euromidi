@@ -3,14 +3,8 @@
 
 #include <stdint.h>
 
-/// Inicializuje usart pro prijem midi
-void midi_recv_init();
+void midi_setup();
 
-/// Vrati pocet bajtu ve vstupnim bufferu.
-uint8_t midi_recv_get_count();
-
-/// Vrati byte ze vstupniho bufferu pokud tam nejaky je,
-/// jinak vrati nedefinovanou hodnotu.
-uint8_t midi_recv_get_byte();
+void midi_set_channel(uint8_t ch);
 
 #endif

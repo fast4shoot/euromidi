@@ -35,7 +35,6 @@ ISR(USART_RX_vect) {
 		// real time message
 		event_t event = {.id = received};
 		event_push(event);
-		// emit event here
 	} else if (MIDI_IS_STATUS(received)) { 
 		// status byte
 		msg[0] = received; // replace current status
@@ -56,7 +55,7 @@ ISR(USART_RX_vect) {
 		msg[msg_len++] = received;
 		if (msg_len == 3) {
 			msg_len = 1; // keep running-status
-			event_t event = {.id = msg[0], .a = msg[1], .b = msg[2]};
+			event_t event = {.id = MIDI_GET_MASKED_MSG(msg[0]), .a = msg[1], .b = msg[2]};
 			event_push(event);
 		}
 	}
