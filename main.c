@@ -8,12 +8,12 @@
 #include "i2c.h"
 #include "display.h"
 #include "mcp4728.h"
+#include "events.h"
 
 typedef enum {
 	encoder_state_n, encoder_state_a, encoder_state_b
 } encoder_state_t;
 
-volatile uint8_t counter = 0;
 volatile encoder_state_t encoder_state = encoder_state_n;
 
 ISR(PCINT2_vect) {
@@ -32,13 +32,20 @@ ISR(PCINT2_vect) {
 			break;
 
 		case encoder_state_a:
-			if (a_change && a) encoder_state = encoder_state_n;
-			else if (b_change && !b){ encoder_state = encoder_state_n; counter++; }
+			if (a_change && a) {
+			   	encoder_state = encoder_state_n;
+			} else if (b_change && !b) {
+				encoder_state = encoder_state_n;
+				event_push((event_t){.id = event_encoder_up});
+			}
 			break;
 
 		case encoder_state_b:
 			if (b_change && b) encoder_state = encoder_state_n;
-			else if (a_change && !a) { encoder_state = encoder_state_n; counter--; }
+			else if (a_change && !a) {
+				encoder_state = encoder_state_n;
+				event_push((event_t){.id = event_encoder_down});
+			}
 			break;
 	}
 }
@@ -82,10 +89,19 @@ int main(void) {
 
 	_delay_ms(10);
 
-	line(127);
-	while(1) {
-		line(counter);
+	uint8_t counter = 0;
 
+	while(1) {
+		event_t ev;
+		if (event_peek(&ev)) {
+			switch (ev.id) {
+				case event_encoder_up: counter++; break;
+				case event_encoder_down: counter--; break;
+				default: break;
+			}
+		}
+
+		line(counter);
 		_delay_ms(10);
 		uint8_t top = (counter & 0xf0) >> 4;
 		uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);

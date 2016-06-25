@@ -33,7 +33,7 @@ ISR(USART_RX_vect) {
 	uint8_t received = UDR0;
 	if (MIDI_IS_REALTIME(received)) {
 		// real time message
-		event_t event = {received, 0, 0};
+		event_t event = {.id = received};
 		event_push(event);
 		// emit event here
 	} else if (MIDI_IS_STATUS(received)) { 
@@ -56,7 +56,7 @@ ISR(USART_RX_vect) {
 		msg[msg_len++] = received;
 		if (msg_len == 3) {
 			msg_len = 1; // keep running-status
-			event_t event = {msg[0], msg[1], msg[2]};
+			event_t event = {.id = msg[0], .a = msg[1], .b = msg[2]};
 			event_push(event);
 		}
 	}
