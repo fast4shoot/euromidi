@@ -20,11 +20,18 @@ void spi_setup() {
 	spi_state = spi_state_ready;
 }
 
-bool spi_tx(uint8_t ss, const void* data, uint8_t len) {
+spi_channel_t spi_setup_channel(uint8_t mask) {
+	SPI_SS_DDR |= mask;
+	SPI_SS_PORT |= mask;
+
+	return (spi_channel_t){mask};
+}
+
+bool spi_tx(spi_channel_t channel, const void* data, uint8_t len) {
 	if (spi_state == spi_state_running) return false;
 
 	spi_state = spi_state_running;
-	tx_ss = ss;
+	tx_ss = channel.mask;
 
 	SPI_SS_PORT &= ~tx_ss;
 

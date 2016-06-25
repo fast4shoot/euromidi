@@ -4,8 +4,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef struct {
+	uint8_t mask;
+} spi_channel_t;
+
 void spi_setup();
-bool spi_tx(uint8_t ss, const void* data, uint8_t len);
+spi_channel_t spi_setup_channel(uint8_t channel);
+bool spi_tx(spi_channel_t channel, const void* data, uint8_t len);
 bool spi_ready();
 
 #endif

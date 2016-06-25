@@ -6,20 +6,8 @@
 #include <stdbool.h>
 #include "spi.h"
 #include "i2c.h"
+#include "display.h"
 #include "mcp4728.h"
-
-const uint8_t digits[] = {
-	0x77,
-	0x42,
-	0x1f,
-	0x4f,
-	0x6a,
-	0x6d,
-	0x7d,
-	0x43,
-	0x7f,
-	0x6f
-};
 
 typedef enum {
 	encoder_state_n, encoder_state_a, encoder_state_b
@@ -60,21 +48,13 @@ void encoder_setup() {
 	PCMSK2 |= (1 << ENC_A_PCINT) | (1 << ENC_B_PCINT);
 }
 
-void led_cmd(uint8_t addr, uint8_t val) {
-	uint8_t data[] = {addr, val};
-	spi_tx(1 << DISP_SS, data, 2);
-}
 
 void setup() {
+	sei();
 	spi_setup();
 	i2c_setup();
 	encoder_setup();
-
-	// TODO: move these into spi_setup, somehow
-	SPI_SS_DDR |= (1 << DISP_SS);
-	SPI_SS_PORT |= (1 << DISP_SS);
-	
-	sei();
+	display_setup();
 
 	_delay_ms(10);
 }
@@ -86,25 +66,11 @@ void line(uint8_t val) {
 	val /= 10;
 	uint8_t hundreds = val % 10;
 	
-	for (int digit = 0; digit < 7; digit++) {
-		// holy shit fix this
-		uint8_t val = 0;
-		val |= (digits[ones] >> digit) & 1;
-		val |= tens == 0 && hundreds == 0 ? 0 : ((digits[tens] >> digit) & 1) << 1;
-		val |= hundreds == 0 ? 0 : ((digits[hundreds] >> digit) & 1) << 2;
-		while (!spi_ready());
-		led_cmd(digit + 1, val);
-	}
+	display_show(hundreds + '0', tens + '0', ones + '0');
 }
 
 int main(void) {
 	setup();
-
-	{
-		led_cmd(0xc, 0x1); // zapnout
-		led_cmd(0xb, 0x6); 
-		led_cmd(0xa, 0xf); // intenzita
-	}
 
 	{
 		uint8_t cmd = MCP4728_CMD_WRITE_VREF | 0x0f;
