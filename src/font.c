@@ -25,7 +25,7 @@ const uint8_t font[128] = {
 
 	// letters
 	['A'] = A|B|C|E|F|G,
-	['B'] = C|D|E|F,
+	['B'] = C|D|E|F|G,
 	['C'] = A|D|E|F,
 	['D'] = B|C|D|E|G,
 	['E'] = A|D|E|F|G,

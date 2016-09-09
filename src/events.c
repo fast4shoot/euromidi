@@ -5,6 +5,10 @@ static volatile uint8_t event_queue_begin = 0;
 static volatile uint8_t event_queue_end = 0;
 
 void event_push(event_t event) {
+	// transform the event
+	if (event.id == event_note_on && event.b == 0) {
+		event.id = event_note_off;
+	}
 	// this may overflow the queue, we just have to hope it doesn't
 	uint8_t end = event_queue_end;
 	event_queue[end] = event;

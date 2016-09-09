@@ -1,7 +1,7 @@
 PROG = main
 MCU2 = m328p
 
-SOURCES = main.c i2c.c spi.c midi.c events.c display.c font.c
+SOURCES = main.c i2c.c spi.c midi.c events.c display.c font.c tick_timer.c
 
 default:
 	avr-gcc @config -o $(PROG).elf $(addprefix src/,$(SOURCES))

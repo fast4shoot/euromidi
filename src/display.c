@@ -13,9 +13,11 @@ void cmd(uint8_t addr, uint8_t val) {
 void display_setup() {
 	spi_channel = spi_setup_channel(1 << DISP_SS);
 
-	cmd(0xc, 0x1); // zapnout
-	cmd(0xb, 0x6); 
-	cmd(0xa, 0xf); // intenzita
+	cmd(0x9, 0x0); // no decode
+	cmd(0xa, 0xf); // highest intensity
+	cmd(0xb, 0x6); // scan limit 7 digits
+	cmd(0xc, 0x1); // no shutdown
+	cmd(0xf, 0x0); // no display test
 }
 
 void display_show(uint8_t a, uint8_t b, uint8_t c) {
@@ -24,8 +26,6 @@ void display_show(uint8_t a, uint8_t b, uint8_t c) {
 		val |= (font[c] >> digit) & 1;
 		val |= ((font[b] >> digit) & 1) << 1;
 		val |= ((font[a] >> digit) & 1) << 2;
-		PIND |= (1 << PD4);
 		cmd(digit + 1, val);
-		PIND |= (1 << PD4);
 	}
 }
