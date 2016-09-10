@@ -7,66 +7,29 @@
 #include "spi.h"
 #include "i2c.h"
 #include "display.h"
+#include "encoder.h"
 #include "mcp4728.h"
 #include "events.h"
 #include "midi.h"
 #include "tick_timer.h"
 
-typedef enum {
-	encoder_state_n, encoder_state_a, encoder_state_b
-} encoder_state_t;
 
-volatile encoder_state_t encoder_state = encoder_state_n;
-
-ISR(PCINT2_vect) {
-	static uint8_t last_port = 0;
-	uint8_t port = ENC_PIN;
-	bool a_change = (port & (1 << ENC_A)) != (last_port & (1 << ENC_A));
-	bool b_change = (port & (1 << ENC_B)) != (last_port & (1 << ENC_B));
-	bool a = !!(port & (1 << ENC_A));
-	bool b = !!(port & (1 << ENC_B));
-	last_port = port;
-
-	switch (encoder_state) {
-		case encoder_state_n:
-			if (a_change && !a && b) encoder_state = encoder_state_a;
-			else if (b_change && !b && a) encoder_state = encoder_state_b;
-			break;
-
-		case encoder_state_a:
-			if (a_change && a) {
-			   	encoder_state = encoder_state_n;
-			} else if (b_change && !b) {
-				encoder_state = encoder_state_n;
-				event_push((event_t){.id = event_encoder_up});
-			}
-			break;
-
-		case encoder_state_b:
-			if (b_change && b) encoder_state = encoder_state_n;
-			else if (a_change && !a) {
-				encoder_state = encoder_state_n;
-				event_push((event_t){.id = event_encoder_down});
-			}
-			break;
-	}
+ISR(PCINT1_vect) {
+	encoder_update();
 }
-
-void encoder_setup() {
-	PCICR |= (1 << ENC_PCIE);
-	PCMSK2 |= (1 << ENC_A_PCINT) | (1 << ENC_B_PCINT);
-}
-
 
 void setup() {
 	sei();
 	spi_setup();
 	i2c_setup();
-	encoder_setup();
+	encoder_init();
 	display_setup();
 	midi_setup();
 	midi_set_channel(0);
 	tick_timer_setup();
+
+	SELECTION_DDR |= SELECTION_PORT_BASE | (SELECTION_PORT_BASE<<1) | (SELECTION_PORT_BASE<<2) | (SELECTION_PORT_BASE<<3);
+	SELECTION_PORT |= SELECTION_PORT_BASE;
 }
 
 void line(uint8_t val) {
@@ -106,15 +69,17 @@ int main(void) {
 
 	_delay_ms(10);
 
+	uint8_t selection = 0;
 	uint8_t counter = 0;
 	uint8_t current_note = 0;
 	uint8_t current_velocity = 0;
+	event_t ev = {0, 0, 0};
 
 	while(1) {
-		event_t ev;
 
 		bool play_note = false;
 		bool stop_note = false;
+		bool move_selection = false;
 
 		while (event_peek(&ev)) {
 			switch (ev.id) {
@@ -131,8 +96,16 @@ int main(void) {
 						stop_note = true;
 					}
 					break;
-				case event_encoder_up: counter++; break;
-				case event_encoder_down: counter--; break;
+				case event_encoder_up: 
+					selection++;
+					selection %= 4;
+					move_selection = true;
+					break;
+				case event_encoder_down:
+					selection--;
+					selection = (selection + 4) % 4;
+					move_selection = true;
+					break;
 				default: break;
 			}
 		}
@@ -149,8 +122,16 @@ int main(void) {
 
 		if (play_note) {
 			display_note(ev.a);
+			play_note = false;
 		} else if (stop_note) {
 			display_show(' ', ' ', ' ');
+			stop_note = false;
+		}
+
+		if (move_selection) {
+			move_selection = false;
+			SELECTION_PORT &= ~(SELECTION_PORT_BASE | (SELECTION_PORT_BASE<<1) | (SELECTION_PORT_BASE<<2) | (SELECTION_PORT_BASE<<3));
+			SELECTION_PORT |= (SELECTION_PORT_BASE << selection);
 		}
 	}
 
