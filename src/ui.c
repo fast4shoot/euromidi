@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "display.h"
 
-typedef enum {
+enum selection_enum {
 	selection_channel = 0,
 	selection_division = 1,
 	selection_out_a = 2,
@@ -13,7 +13,9 @@ typedef enum {
 	selection_out_c = 4,
 
 	selection_max = 4, // a 'sentinel' value
-} selection_t;
+};
+
+typedef uint8_t selection_t;
 
 static selection_t selection;
 static bool selected;

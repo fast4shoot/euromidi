@@ -6,7 +6,7 @@
 
 // Enum of all possible events.
 // Some events may have up to two bytes of additional data
-typedef enum {
+enum event_id_enum {
 	// midi channel mode events
 	// these have additional data taken directly from
 	// the midi receiver
@@ -28,7 +28,9 @@ typedef enum {
 	event_encoder_up = 0x1,
 	event_encoder_down = 0x2,
 	event_encoder_press = 0x3,
-} event_id_t;
+};
+
+typedef uint8_t event_id_t;
 
 // We store each event in this struct to make
 // everything easier.

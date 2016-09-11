@@ -3,10 +3,12 @@
 #include <string.h>
 #include "spi.h"
 
-typedef enum {
+enum spi_state_enum {
 	spi_state_ready,
 	spi_state_running
-} spi_state_t;
+};
+
+typedef uint8_t spi_state_t;
 
 typedef struct {
 	uint8_t end; // index just past the last byte of this transaction

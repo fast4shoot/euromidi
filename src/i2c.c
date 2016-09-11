@@ -11,10 +11,12 @@
 #error "PRESCALER has to be 1"
 #endif
 
-typedef enum {
+enum i2c_state_enum {
 	i2c_state_ready,
 	i2c_state_running
-} i2c_state_t;
+};
+
+typedef uint8_t i2c_state_t;
 
 static uint8_t tx_buffer[I2C_TX_BUFSIZE];
 static uint8_t tx_buffer_len;

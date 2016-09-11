@@ -4,9 +4,11 @@
 #include <stdbool.h>
 #include "events.h"
 
-typedef enum {
+enum encoder_state_enum {
 	encoder_state_n, encoder_state_a, encoder_state_b
-} encoder_state_t;
+};
+
+typedef uint8_t encoder_state_t;
 
 static uint8_t last_port;
 static encoder_state_t state;
