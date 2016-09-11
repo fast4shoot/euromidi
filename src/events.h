@@ -28,6 +28,10 @@ enum event_id_enum {
 	event_encoder_up = 0x1,
 	event_encoder_down = 0x2,
 	event_encoder_press = 0x3,
+
+	// config changes, 
+	// a is type, b is new value
+	event_config_changed = 0x10,
 };
 
 typedef uint8_t event_id_t;

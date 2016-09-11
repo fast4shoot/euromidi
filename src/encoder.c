@@ -15,7 +15,7 @@ static encoder_state_t state;
 
 void encoder_init() {
 	PCICR |= (1 << ENC_PCIE);
-	ENC_PCMSK |= (1 << ENC_A_PCINT) | (1 << ENC_B_PCINT);
+	ENC_PCMSK |= (1 << ENC_A_PCINT) | (1 << ENC_B_PCINT) | (1 << ENC_BTN_PCINT);
 	last_port = 0;
 	state = encoder_state_n;
 }
@@ -24,8 +24,10 @@ void encoder_update() {
 	uint8_t port = ENC_PIN;
 	bool a_change = (port & (1 << ENC_A)) != (last_port & (1 << ENC_A));
 	bool b_change = (port & (1 << ENC_B)) != (last_port & (1 << ENC_B));
+	bool btn_change = (port & (1 << ENC_BTN)) != (last_port & (1 << ENC_BTN));
 	bool a = !!(port & (1 << ENC_A));
 	bool b = !!(port & (1 << ENC_B));
+	bool btn = !!(port & (1 << ENC_BTN));
 	last_port = port;
 
 	switch (state) {
@@ -51,5 +53,9 @@ void encoder_update() {
 				event_push((event_t){.id = event_encoder_down});
 			}
 			break;
+	}
+
+	if (btn_change && btn) {
+		event_push((event_t){.id = event_encoder_press});
 	}
 }

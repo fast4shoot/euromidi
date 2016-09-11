@@ -3,22 +3,13 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
+#include "config.h"
 #include "display.h"
 
-enum selection_enum {
-	selection_channel = 0,
-	selection_division = 1,
-	selection_out_a = 2,
-	selection_out_b = 3,
-	selection_out_c = 4,
-
-	selection_max = 4, // a 'sentinel' value
-};
-
-typedef uint8_t selection_t;
-
-static selection_t selection;
+static config_param_t selection;
 static bool selected;
+static uint8_t value;
+static uint8_t value_max;
 
 void ui_setup() {
 	SELECTION_DDR |= (7 << SELECTION_PORT_BASE);
@@ -28,21 +19,32 @@ void ui_setup() {
 
 void ui_next() {
 	if (!selected) {
-		if (selection == selection_max) selection = 0;
+		if (selection == config_param_max) selection = 0;
 		else selection++;
+	} else {
+		if (value == value_max) value = 0;
+		else value++;
 	}
 }
 
 void ui_prev() {
 	if (!selected) {
-		if (selection == 0) selection = selection_max;
+		if (selection == 0) selection = config_param_max;
 		else selection--;
+	} else {
+		if (value == 0) value = value_max;
+		else value--;
 	}
 }
 
 void ui_button() {
 	if (!selected) {
 		selected = true;
+		value = config_get(selection);
+		value_max = config_get_max(selection);
+	} else {
+		selected = false;
+		config_set(selection, value);
 	}
 }
 
@@ -53,4 +55,12 @@ void ui_update_display() {
 	port |= selection << SELECTION_PORT_BASE;
 	SELECTION_PORT = port;
 	sei();
+
+	if (selected) {
+		uint8_t name[3];
+		config_get_name(selection, value, name);
+		display_show(name[0], name[1], name[2]);
+	} else {
+		display_show(' ', ' ', ' ');
+	}
 }

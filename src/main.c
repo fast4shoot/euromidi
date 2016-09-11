@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "spi.h"
 #include "i2c.h"
+#include "config.h"
 #include "display.h"
 #include "encoder.h"
 #include "events.h"
@@ -15,6 +16,7 @@
 #include "ui.h"
 
 ISR(PCINT1_vect) {
+	// TODO: do not update if we haven't finished setup
 	encoder_update();
 }
 
@@ -26,6 +28,7 @@ void setup() {
 	display_setup();
 	midi_setup();
 	midi_set_channel(0);
+	config_setup();
 	ui_setup();
 }
 
@@ -79,6 +82,9 @@ int main(void) {
 					break;
 				case event_encoder_down:
 					ui_prev();
+					break;
+				case event_encoder_press:
+					ui_button();
 					break;
 				default: break;
 			}
