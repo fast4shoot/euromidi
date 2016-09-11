@@ -29,3 +29,21 @@ void display_show(uint8_t a, uint8_t b, uint8_t c) {
 		cmd(digit + 1, val);
 	}
 }
+
+void display_show_note(uint8_t note) {
+	static const char* names[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "H "};
+	const char* name = names[note % 12];
+	uint8_t octave = note / 12;
+	uint8_t octave_char = octave == 0 ? '-' : ('0' + octave - 1);
+	display_show(name[0], name[1], octave_char);
+}
+
+void display_show_number(uint8_t number) {
+	uint8_t ones = number % 10;
+	number /= 10;
+	uint8_t tens = number % 10;
+	number /= 10;
+	uint8_t hundreds = number % 10;
+	
+	display_show(hundreds + '0', tens + '0', ones + '0');
+}

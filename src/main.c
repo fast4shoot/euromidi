@@ -8,11 +8,11 @@
 #include "i2c.h"
 #include "display.h"
 #include "encoder.h"
-#include "mcp4728.h"
 #include "events.h"
+#include "mcp4728.h"
 #include "midi.h"
 #include "tick_timer.h"
-
+#include "ui.h"
 
 ISR(PCINT1_vect) {
 	encoder_update();
@@ -26,28 +26,7 @@ void setup() {
 	display_setup();
 	midi_setup();
 	midi_set_channel(0);
-	tick_timer_setup();
-
-	SELECTION_DDR |= SELECTION_PORT_BASE | (SELECTION_PORT_BASE<<1) | (SELECTION_PORT_BASE<<2) | (SELECTION_PORT_BASE<<3);
-	SELECTION_PORT |= SELECTION_PORT_BASE;
-}
-
-void line(uint8_t val) {
-	uint8_t ones = val % 10;
-	val /= 10;
-	uint8_t tens = val % 10;
-	val /= 10;
-	uint8_t hundreds = val % 10;
-	
-	display_show(hundreds + '0', tens + '0', ones + '0');
-}
-
-void display_note(uint8_t note) {
-	static const char* names[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "H "};
-	const char* name = names[note % 12];
-	uint8_t octave = note / 12;
-	uint8_t octave_char = octave == 0 ? '-' : ('0' + octave - 1);
-	display_show(name[0], name[1], octave_char);
+	ui_setup();
 }
 
 uint8_t to_hex(uint8_t x) {
@@ -68,18 +47,17 @@ int main(void) {
 	}
 
 	_delay_ms(10);
+	
+	tick_timer_setup();
 
-	uint8_t selection = 0;
 	uint8_t counter = 0;
 	uint8_t current_note = 0;
 	uint8_t current_velocity = 0;
 	event_t ev = {0, 0, 0};
 
 	while(1) {
-
 		bool play_note = false;
 		bool stop_note = false;
-		bool move_selection = false;
 
 		while (event_peek(&ev)) {
 			switch (ev.id) {
@@ -97,14 +75,10 @@ int main(void) {
 					}
 					break;
 				case event_encoder_up: 
-					selection++;
-					selection %= 4;
-					move_selection = true;
+					ui_next();
 					break;
 				case event_encoder_down:
-					selection--;
-					selection = (selection + 4) % 4;
-					move_selection = true;
+					ui_prev();
 					break;
 				default: break;
 			}
@@ -121,18 +95,14 @@ int main(void) {
 		i2c_tx(DAC_ADDR, data, 8);
 
 		if (play_note) {
-			display_note(ev.a);
+			display_show_note(ev.a);
 			play_note = false;
 		} else if (stop_note) {
 			display_show(' ', ' ', ' ');
 			stop_note = false;
 		}
 
-		if (move_selection) {
-			move_selection = false;
-			SELECTION_PORT &= ~(SELECTION_PORT_BASE | (SELECTION_PORT_BASE<<1) | (SELECTION_PORT_BASE<<2) | (SELECTION_PORT_BASE<<3));
-			SELECTION_PORT |= (SELECTION_PORT_BASE << selection);
-		}
+		ui_update_display();
 	}
 
 	return 0;
