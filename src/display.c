@@ -18,9 +18,19 @@ void display_setup() {
 	cmd(0xb, 0x6); // scan limit 7 digits
 	cmd(0xc, 0x1); // no shutdown
 	cmd(0xf, 0x0); // no display test
+
+
 }
 
 void display_show(uint8_t a, uint8_t b, uint8_t c) {
+	static uint8_t disp_a = 0, disp_b = 0, disp_c = 0;
+	if (disp_a == a
+		&& disp_b == b
+		&& disp_c == c) return;
+	disp_a = a;
+	disp_b = b;
+	disp_c = c;
+
 	for (int digit = 0; digit < 7; digit++) {
 		uint8_t val = 0;
 		val |= (font[c] >> digit) & 1;

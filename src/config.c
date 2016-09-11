@@ -62,7 +62,7 @@ void config_get_name(config_param_t param, uint8_t value, uint8_t* name) {
 				number_to_name(value - 121, name);
 				name[0] = 'C';
 			} else {
-				name[0] = 'P'; name[1] = 'B'; name[2] = ' ';
+				name[0] = ' '; name[1] = 'P'; name[2] = 'B';
 			}
 	}
 }

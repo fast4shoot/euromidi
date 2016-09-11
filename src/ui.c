@@ -21,6 +21,7 @@ void ui_next() {
 	if (!selected) {
 		if (selection == config_param_max) selection = 0;
 		else selection++;
+		value = config_get(selection);
 	} else {
 		if (value == value_max) value = 0;
 		else value++;
@@ -31,6 +32,7 @@ void ui_prev() {
 	if (!selected) {
 		if (selection == 0) selection = config_param_max;
 		else selection--;
+		value = config_get(selection);
 	} else {
 		if (value == 0) value = value_max;
 		else value--;
@@ -40,7 +42,6 @@ void ui_prev() {
 void ui_button() {
 	if (!selected) {
 		selected = true;
-		value = config_get(selection);
 		value_max = config_get_max(selection);
 	} else {
 		selected = false;
@@ -55,12 +56,8 @@ void ui_update_display() {
 	port |= selection << SELECTION_PORT_BASE;
 	SELECTION_PORT = port;
 	sei();
-
-	if (selected) {
-		uint8_t name[3];
-		config_get_name(selection, value, name);
-		display_show(name[0], name[1], name[2]);
-	} else {
-		display_show(' ', ' ', ' ');
-	}
+	
+	uint8_t name[3];
+	config_get_name(selection, value, name);
+	display_show(name[0], name[1], name[2]);
 }

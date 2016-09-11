@@ -15,8 +15,10 @@
 #include "tick_timer.h"
 #include "ui.h"
 
+volatile bool ready = false;
+
 ISR(PCINT1_vect) {
-	// TODO: do not update if we haven't finished setup
+	if (!ready) return;
 	encoder_update();
 }
 
@@ -30,17 +32,7 @@ void setup() {
 	midi_set_channel(0);
 	config_setup();
 	ui_setup();
-}
-
-uint8_t to_hex(uint8_t x) {
-	x &= 0xf;
-	if (x < 10) return '0' + x;
-	else return 'A' + x;
-}
-
-int main(void) {
-	setup();
-
+	
 	{
 		uint8_t cmd = MCP4728_CMD_WRITE_VREF | 0x0f;
 		i2c_tx(DAC_ADDR, &cmd, 1);
@@ -52,6 +44,18 @@ int main(void) {
 	_delay_ms(10);
 	
 	tick_timer_setup();
+	ready = true;
+	DDRC |= 1 << PC3;
+}
+
+uint8_t to_hex(uint8_t x) {
+	x &= 0xf;
+	if (x < 10) return '0' + x;
+	else return 'A' + x;
+}
+
+int main(void) {
+	setup();
 
 	uint8_t counter = 0;
 	uint8_t current_note = 0;
@@ -65,6 +69,7 @@ int main(void) {
 		while (event_peek(&ev)) {
 			switch (ev.id) {
 				case event_tick:
+					PINC |= (1 << PC3);
 					counter++;
 					break;
 				case event_note_on:
@@ -89,16 +94,18 @@ int main(void) {
 				default: break;
 			}
 		}
-		
-		uint8_t top = (counter & 0xf0) >> 4;
-		uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);
-		uint8_t data[8] = {
-			(current_note & 0x78) >> 3,
-			((current_note & 0x07) << 5) | ((current_note & 0x7c) >> 2),
-			(current_velocity & 0x78) >> 3,
-			((current_velocity & 0x07) << 5) | ((current_velocity & 0x7c) >> 2),
-			top, bottom, top, bottom};
-		i2c_tx(DAC_ADDR, data, 8);
+	
+		if (i2c_ready()) {
+			uint8_t top = (counter & 0xf0) >> 4;
+			uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);
+			uint8_t data[8] = {
+				(current_note & 0x78) >> 3,
+				((current_note & 0x07) << 5) | ((current_note & 0x7c) >> 2),
+				(current_velocity & 0x78) >> 3,
+				((current_velocity & 0x07) << 5) | ((current_velocity & 0x7c) >> 2),
+				top, bottom, top, bottom};
+			i2c_tx(DAC_ADDR, data, 8);
+		}
 
 		if (play_note) {
 			display_show_note(ev.a);
