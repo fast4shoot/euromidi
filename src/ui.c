@@ -57,7 +57,7 @@ void ui_update_display() {
 	SELECTION_PORT = port;
 	sei();
 	
-	uint8_t name[3];
+	uint8_t name[3] = "ERR";
 	config_get_name(selection, value, name);
 	display_show(name[0], name[1], name[2]);
 }

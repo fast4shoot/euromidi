@@ -4,14 +4,14 @@
 
 static const uint8_t param_max[config_param_count] = {
 	[config_param_channel] = 15,
-	[config_param_division] = 10, // 1 2 3 4 6 8 12 16 24 32 48 96
+	[config_param_division] = 11, // 1 2 3 4 6 8 12 16 24 32 48 96
 	[config_param_out_a] = 153, // 0-120 7bit, 121 - 152 32 14bit, 153 pitch
 	[config_param_out_b] = 153,
 	[config_param_out_c] = 153,
 };
 
 static const uint8_t division_val[] = {
-	1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 96
+	1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 96
 };
 
 static uint8_t config_value[config_param_count];
