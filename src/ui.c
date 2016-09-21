@@ -12,7 +12,6 @@ static uint8_t value;
 static uint8_t value_max;
 
 void ui_setup() {
-	SELECTION_DDR |= (7 << SELECTION_PORT_BASE);
 	selection = 0;
 	selected = false;	
 }
@@ -50,14 +49,8 @@ void ui_button() {
 }
 
 void ui_update_display() {
-	cli();
-	uint8_t port = SELECTION_PORT;
-	port &= ~(7 << SELECTION_PORT_BASE);
-	port |= selection << SELECTION_PORT_BASE;
-	SELECTION_PORT = port;
-	sei();
-	
 	uint8_t name[3] = "ERR";
 	config_get_name(selection, value, name);
 	display_show(name[0], name[1], name[2]);
+	display_leds(1 << selection);
 }
