@@ -1,27 +1,27 @@
 #include "font.h"
 
-#define A 0x01
-#define B 0x02
-#define C 0x40
-#define D 0x04
-#define E 0x10
-#define F 0x20
-#define G 0x08
+#define A 0x40
+#define B 0x20
+#define C 0x10
+#define D 0x08
+#define E 0x04
+#define F 0x02
+#define G 0x01
 
 const uint8_t font[128] = {
 	[' '] = 0,
 
 	// digits
-	['0'] = 0x77,
-	['1'] = 0x42,
-	['2'] = 0x1f,
-	['3'] = 0x4f,
-	['4'] = 0x6a,
-	['5'] = 0x6d,
-	['6'] = 0x7d,
-	['7'] = 0x43,
-	['8'] = 0x7f,
-	['9'] = 0x6f,
+	['0'] = A|B|C|D|E|F,
+	['1'] = B|C,
+	['2'] = A|B|D|E|G,
+	['3'] = A|B|C|D|G,
+	['4'] = B|C|F|G,
+	['5'] = A|C|D|F|G,
+	['6'] = A|C|D|E|F|G,
+	['7'] = A|B|C,
+	['8'] = A|B|C|D|E|F|G,
+	['9'] = A|B|C|D|F|G,
 
 	// letters
 	['A'] = A|B|C|E|F|G,

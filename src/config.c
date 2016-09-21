@@ -39,6 +39,7 @@ void config_setup() {
 
 void config_save() {
 	// TODO: save data to EEPROM
+	// TODO: dostat Aleše na Akicon
 }
 
 uint8_t config_get_max(config_param_t param) {
