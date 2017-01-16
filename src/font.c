@@ -37,11 +37,11 @@ const uint8_t font[128] = {
 	// K 
 	['L'] = D|E|F,
 	// M
-	// N
+	['N'] = A|B|C|E|F,
 	['O'] = A|B|C|D|E|F, // the same as a zero
 	['P'] = A|B|E|F|G,
 	// Q
-	// R
+	['R'] = E|G,
 	['S'] = A|F|G|D|C, // the same as a five
 	// T
 	['U'] = B|C|D|E|F,

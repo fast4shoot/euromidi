@@ -41,7 +41,7 @@ void encoder_update() {
 			   	state = encoder_state_n;
 			} else if (b_change && !b) {
 				state = encoder_state_n;
-				event_push((event_t){.id = event_encoder_up});
+				event_push((event_t){.id = event_encoder_down});
 			}
 			break;
 
@@ -50,7 +50,7 @@ void encoder_update() {
 				state = encoder_state_n;
 			} else if (a_change && !a) {
 				state = encoder_state_n;
-				event_push((event_t){.id = event_encoder_down});
+				event_push((event_t){.id = event_encoder_up});
 			}
 			break;
 	}

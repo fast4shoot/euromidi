@@ -32,7 +32,9 @@ void setup() {
 	midi_set_channel(0);
 	config_setup();
 	ui_setup();
+	DOUT_DDR |= 0x1f << DOUT_BASE;
 	
+	DAC_LDAC_DDR |= 1 << DAC_LDAC;
 	{
 		uint8_t cmd = MCP4728_CMD_WRITE_VREF | 0x0f;
 		i2c_tx(DAC_ADDR, &cmd, 1);
@@ -45,7 +47,6 @@ void setup() {
 	
 	tick_timer_setup();
 	ready = true;
-	DDRC |= 1 << PC3;
 }
 
 uint8_t to_hex(uint8_t x) {
@@ -62,6 +63,8 @@ int main(void) {
 	uint8_t current_velocity = 0;
 	event_t ev = {0, 0, 0};
 
+	display_show_number(10);
+
 	while(1) {
 		bool play_note = false;
 		bool stop_note = false;
@@ -69,7 +72,6 @@ int main(void) {
 		while (event_peek(&ev)) {
 			switch (ev.id) {
 				case event_tick:
-					PINC |= (1 << PC3);
 					counter++;
 					break;
 				case event_note_on:
@@ -98,9 +100,10 @@ int main(void) {
 		if (i2c_ready()) {
 			uint8_t top = (counter & 0xf0) >> 4;
 			uint8_t bottom = ((counter & 0x0f) << 4) | ((counter & 0xf0) >> 4);
+			uint16_t note = current_note * 32 + 16;
 			uint8_t data[8] = {
-				(current_note & 0x78) >> 3,
-				((current_note & 0x07) << 5) | ((current_note & 0x7c) >> 2),
+				(note & 0xff00) >> 8,
+				note & 0x00ff,
 				(current_velocity & 0x78) >> 3,
 				((current_velocity & 0x07) << 5) | ((current_velocity & 0x7c) >> 2),
 				top, bottom, top, bottom};
@@ -108,10 +111,16 @@ int main(void) {
 		}
 
 		if (play_note) {
-			display_show_note(ev.a);
+			DOUT_PORT |= 1 << DOUT_BASE;
+		} else if (stop_note) {
+			DOUT_PORT &= ~(1 << DOUT_BASE);
+		}
+
+		if (play_note) {
+			//display_show_note(ev.a);
 			play_note = false;
 		} else if (stop_note) {
-			display_show(' ', ' ', ' ');
+			//display_show(' ', ' ', ' ');
 			stop_note = false;
 		}
 
